@@ -36,6 +36,11 @@ assert (len(X_train) == len(y_train))
 assert (len(X_valid) == len(y_valid))
 assert (len(X_test) == len(y_test))
 
+# # Normalize the data
+# X_train = helper.normalize(X_train)
+# X_valid = helper.normalize(X_valid)
+# X_test = helper.normalize(X_test)
+
 # Step 1: Dataset Summary & Exploration
 # Number of training examples
 n_train = len(X_train)
@@ -62,13 +67,12 @@ helper.display_images_and_labels(X_train, y_train, n_train)
 
 # Preprocess Data
 # Shuffle the training data.
-
 X_train, y_train = shuffle(X_train, y_train)
 
 
 # Runtime parameters
-EPOCHS = 10
-BATCH_SIZE = 128
+EPOCHS = 100
+BATCH_SIZE = 256
 
 # LeNet-5
 
@@ -120,7 +124,7 @@ def LeNet(x):
 
     # SOLUTION: Layer 5: Fully Connected. Input = 84. Output = 43 (43 different signs).
     fc3_W  = tf.Variable(tf.truncated_normal(shape=(84, 43), mean = mu, stddev = sigma))
-    fc3_b  = tf.Variable(tf.zeros(10))
+    fc3_b  = tf.Variable(tf.zeros(43))
     logits = tf.matmul(fc2, fc3_W) + fc3_b
     
     return logits
