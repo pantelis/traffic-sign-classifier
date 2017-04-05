@@ -5,10 +5,9 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import helper
+import tensorflow as tf
 
-#plt.style.use('ggplot')
-
-# Build a Traffic Sign Recognition Classifier
+# Traffic Sign Recognition Classifier
 
 # Step 0: Load The Data
 training_file = '../traffic-signs-data/train.p'
@@ -57,7 +56,6 @@ print("Validation Set: {} samples".format(n_valid))
 print("Test Set:       {} samples".format(n_test))
 print("Number of classes =", n_classes)
 
-
 # Include an exploratory visualization of the dataset
 
 # Visualize the German Traffic Signs Dataset using the pickled file(s). This is open ended, suggestions include:
@@ -88,33 +86,43 @@ X_train = helper.normalize(X_train)
 X_valid = helper.normalize(X_valid)
 X_test = helper.normalize(X_test)
 
-# Display the "histogram" of classes
-# helper.display_images_and_labels(X_train, y_train, n_train)
-
 # Model Architecture
 
+input = tf.placeholder(tf.float32, (None, 32, 32, 3))
+filter_weights = tf.Variable(tf.truncated_normal((8, 8, 3, 20))) # (height, width, input_depth, output_depth)
+filter_bias = tf.Variable(tf.zeros(20))
+strides = [1, 2, 2, 1] # (batch, height, width, depth)
+padding = 'SAME'
+conv = tf.nn.conv2d(input, filter_weights, strides, padding) + filter_bias
+
+conv_layer = tf.nn.conv2d(input, weight, strides=[1, 2, 2, 1], padding='SAME')
+conv_layer = tf.nn.bias_add(conv_layer, bias)
+conv_layer = tf.nn.relu(conv_layer)
+# Apply Max Pooling
+conv_layer = tf.nn.max_pool(
+    conv_layer,
+    ksize=[1, 2, 2, 1],
+    strides=[1, 2, 2, 1],
+    padding='SAME')
 
 # Train, Validate and Test the Model
 
 # A validation set can be used to assess how well the model is performing. A low accuracy on the training and validation
 # sets imply underfitting. A high accuracy on the training set but low accuracy on the validation set implies overfitting.
 
-# In[1]:
 
-### Train your model here.
-### Calculate and report the accuracy on the training and validation set.
-### Once a final model architecture is selected, 
-### the accuracy on the test set should be calculated and reported as well.
-### Feel free to use as many code cells as needed.
+# Train the model.
+# Calculate and report the accuracy on the training and validation set.
+# Once a final model architecture is selected, the accuracy on the test set should be calculated and reported as well.
+# Feel free to use as many code cells as needed.
 
 
-# ---
-# 
-# ## Step 3: Test a Model on New Images
-# 
-# To give yourself more insight into how your model is working, download at least five pictures of German traffic signs from the web and use your model to predict the traffic sign type.
-# 
-# You may find `signnames.csv` useful as it contains mappings from the class id (integer) to the actual sign name.
+
+
+# Step 3: Test a Model on New Images
+# To give yourself more insight into how your model is working, download at least five pictures of German traffic signs
+# from the web and use your model to predict the traffic sign type.
+
 
 # ### Load and Output the Images
 
@@ -126,7 +134,6 @@ X_test = helper.normalize(X_test)
 
 # ### Predict the Sign Type for Each Image
 
-# In[3]:
 
 ### Run the predictions here and use the model to output the prediction for each image.
 ### Make sure to pre-process the images with the same pre-processing pipeline used earlier.
@@ -135,7 +142,6 @@ X_test = helper.normalize(X_test)
 
 # ### Analyze Performance
 
-# In[4]:
 
 ### Calculate the accuracy for these 5 new images. 
 ### For example, if the model predicted 1 out of 5 signs correctly, it's 20% accurate on these new images.
@@ -181,21 +187,12 @@ X_test = helper.normalize(X_test)
 # 
 # Looking just at the first row we get `[ 0.34763842,  0.24879643,  0.12789202]`, you can confirm these are the 3 largest probabilities in `a`. You'll also notice `[3, 0, 5]` are the corresponding indices.
 
-# In[3]:
 
 ### Print out the top five softmax probabilities for the predictions on the German traffic sign images found on the web. 
 ### Feel free to use as many code cells as needed.
 
 
-# ### Project Writeup
-# 
-# Once you have completed the code implementation, document your results in a project writeup using this [template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) as a guide. The writeup can be in a markdown or pdf file. 
 
-# > **Note**: Once you have completed all of the code implementations and successfully answered each question above, you may finalize your work by exporting the iPython Notebook as an HTML document. You can do this by using the menu above and navigating to  \n",
-#     "**File -> Download as -> HTML (.html)**. Include the finished document along with this notebook as your submission.
-
-# ---
-# 
 # ## Step 4 (Optional): Visualize the Neural Network's State with Test Images
 # 
 #  This Section is not required to complete but acts as an additional excersise for understaning the output of a neural network's weights. While neural networks can be a great learning device they are often referred to as a black box. We can understand what the weights of a neural network look like better by plotting their feature maps. After successfully training your neural network you can see what it's feature maps look like by plotting the output of the network's weight layers in response to a test stimuli image. From these plotted feature maps, it's possible to see what characteristics of an image the network finds interesting. For a sign, maybe the inner network feature maps react with high activation to the sign's boundary outline or to the contrast in the sign's painted symbol.
