@@ -51,16 +51,6 @@ The only pre-processing step applied was that of normalization. We normalized th
 #### Model Architecture
 The final model architecture is shown in the following table. The model was implemented in Keras with a TensorFlow (TF) backend.
 
-model.add(Convolution2D(32, 3, 3, input_shape=(32, 32, 3)))
-model.add(MaxPooling2D((2, 2)))
-model.add(Dropout(0.5))
-model.add(Activation('relu'))
-model.add(Flatten())
-model.add(Dense(128))
-model.add(Activation('relu'))
-model.add(Dense(43))
-model.add(Activation('softmax'))
-
 | Layer         		|     Description in Keras API	        					|
 |:---------------------:|:---------------------------------------------:| 
 | Input         		| 32x32x3 RGB image   							| 
@@ -106,7 +96,7 @@ If a well known architecture was chosen:
 * How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
 
 #### Cross-validation Strategy
-We should point out that there are two options for CV in problems where both architecture and hyperparameters need to determined. The first option involves at least one *nested* cross-validation loop as shown in ![][nested-cv]. 
+We should point out that there are two options for CV in problems where both architecture and hyperparameters need to determined. The first option involves at least one *nested* cross-validation loop as shown in ![][nested-cv].
 
 
 #### Optimization of batch size and Number of Epochs
