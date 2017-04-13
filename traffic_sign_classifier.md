@@ -15,13 +15,12 @@ For German traffic signs classification, the Keras API was used to define a deep
 
 [dataset-summary]: ./traffic-signs-dataset-statistics.png "Dataset Summary"
 [dataset-visual-histogram]: ./traffic-signs-visual-histogram.png "Visual Histogram"
-{:height="200px" width="300px"}
 [image2]: ./examples/grayscale.jpg "Grayscaling"
 [image3]: ./examples/random_noise.jpg "Random Noise"
 [dataset-summary]: ./traffic-signs-dataset-statistics.png "Dataset Summary"
 [dataset-visual-histogram]: ./traffic-signs-visual-histogram.png "Visual Histogram"
-[nested-cv]: (https://github.com/pantelis/traffic-sign-classifier/blob/master/nested-cv.jpg) "Nested CV"
-[simple-cv]: (https://github.com/pantelis/traffic-sign-classifier/blob/master/simple-cv.jpg) "Simple CV"
+[nested-cv]: ./nested-cv.jpg "Nested CV"
+[simple-cv]: ./simple-cv.jpg "Simple CV"
 [sign1]: ../traffic-signs-data/sign1.jpg "Traffic Sign 1"
 [sign2]: ../traffic-signs-data/sign2.jpg "Traffic Sign 2"
 [sign3]: ../traffic-signs-data/sign3.jpg "Traffic Sign 3"
@@ -32,14 +31,13 @@ For German traffic signs classification, the Keras API was used to define a deep
 A summary of the traffic signs data set is shown in
 
 ![][dataset-summary]
+
 _Dataset summary_
 
 A visual inspection of the unique signs of the dataset is shown in
 
-![dataset-visual-histogram].
+![dataset-visual-histogram]
 
-
-<!-- <img src="traffic-signs-visual-histogram.png" alt="dataset-visual-histogram" style="width: 100px;"/> -->
 _Visual histogram of unique signs in the dataset_
 
 
@@ -96,7 +94,16 @@ If a well known architecture was chosen:
 * How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
 
 #### Cross-validation Strategy
-We should point out that there are two options for CV in problems where both architecture and hyperparameters need to determined. The first option involves at least one *nested* cross-validation loop as shown in ![][nested-cv].
+We should point out that there are two options for CV in problems where both architecture and hyperparameters need to determined. The first option involves at least one *nested* cross-validation loop as shown in
+
+
+![][nested-cv]
+
+_Nested CV. The inner CV loop determines via grid search the optimal hyper parameters and ensures that the selected permutation generalizes well on the inner loop validation data. The outer loop evaluates the model based on the generalization results on the outer validation data._
+
+![][simple-cv]
+
+_Simpler CV where the hyper parameters are determined in one step together with the other model parametes (e.g. weights)._
 
 
 #### Optimization of batch size and Number of Epochs
@@ -111,8 +118,8 @@ We should point out that there are two options for CV in problems where both arc
 
 Here are five German traffic signs that I found on the web:
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+![alt text][sign1] ![alt text][sign2] ![alt text][sign3]
+![alt text][sign4] ![alt text][sign5]
 
 The first image might be difficult to classify because ...
 
