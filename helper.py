@@ -58,22 +58,10 @@ def crop_image(image):
     # plt.imshow(cropped)
     return cropped
 
-def normalize(images_rgb):
-    ''' Normalize RGB images. images_rgb are assumed to have a [num_images, :, :, 0-2] shape.
-    '''
-    norm_images_rgb = np.zeros_like(images_rgb)
+def normalize(X_train, X_valid, X_test):
+    '''Normalize image data'''
+    X_train_norm = np.array(X_train / 255.0 - 0.5)
+    X_valid_norm = np.array(X_valid / 255.0 - 0.5)
+    X_test_norm = np.array(X_test / 255.0 - 0.5)
 
-    b = images_rgb[:, :, :, 0]
-    g = images_rgb[:, :, :, 1]
-    r = images_rgb[:, :, :, 2]
-
-    norm_images_rgb[:, :, :, 0] = (b - [128.0]) / [128.0]
-    norm_images_rgb[:, :, :, 1] = (g - [128.0]) / [128.0]
-    norm_images_rgb[:, :, :, 0] = (r - [128.0]) / [128.0]
-
-    # for i in range(images_rgb.shape[0]):
-    #     norm_images_rgb[i, :, :, 0] = b.reshape((images_rgb.shape[0], -1, -1, 0))
-    #     norm_images_rgb[i, :, :, 1] = g.arrange((images_rgb.shape[0], -1, -1, 0))
-    #     norm_images_rgb[i, :, :, 2] = r.arrange((images_rgb.shape[0], -1, -1, 0))
-
-    return norm_images_rgb
+    return X_train_norm, X_valid_norm, X_test_norm
