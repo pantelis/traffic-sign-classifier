@@ -8,6 +8,8 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import helper
+import time
+from datetime import datetime
 
 # Step 0: Load The Traffic Sign Data
 training_file = '../traffic-signs-data/train.p'
@@ -51,7 +53,7 @@ n_test = len(X_test)
 # What's the shape of an traffic sign image
 image_shape = X_train[0].shape
 # How many unique classes/labels there are in the dataset.
-n_classes = 42
+n_classes = 43
 
 print()
 print("Image Shape: {}".format(image_shape))
@@ -71,7 +73,7 @@ X_train, y_train = shuffle(X_train, y_train)
 
 
 # Runtime parameters
-EPOCHS = 100
+EPOCHS = 10
 BATCH_SIZE = 256
 
 # LeNet-5
@@ -139,6 +141,7 @@ one_hot_y = tf.one_hot(y, 43)
 
 
 # Training Pipeline
+beginTime = time.time()
 rate = 0.001
 
 logits = LeNet(x)
@@ -185,6 +188,10 @@ with tf.Session() as sess:
     # Save the model after training.
     saver.save(sess, './lenet')
     print("Model saved")
+
+endTime = time.time()
+print('Training time: {:5.2f}s'.format(endTime - beginTime))
+
 
 
 # Evaluate the Model
