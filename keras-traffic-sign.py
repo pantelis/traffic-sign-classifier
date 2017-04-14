@@ -1,4 +1,3 @@
-
 import pickle
 import numpy as np
 import tensorflow as tf
@@ -15,9 +14,9 @@ import helper
 tf.python.control_flow_ops = tf
 
 # Load pickled data
-training_file = '../traffic-signs-data/train.p'
-validation_file = '../traffic-signs-data/valid.p'
-testing_file = '../traffic-signs-data/test.p'
+training_file = 'train.p'
+validation_file = 'valid.p'
+testing_file = 'test.p'
 
 with open(training_file, mode='rb') as f:
     train = pickle.load(f)
