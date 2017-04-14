@@ -2,16 +2,16 @@
 import pickle
 import numpy as np
 import tensorflow as tf
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelBinarizer
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Flatten, Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras.models import model_from_json
-from keras.callbacks import ModelCheckpoint
-from keras import initializers
 import helper
 
+from keras.wrappers.scikit_learn import KerasClassifier
 tf.python.control_flow_ops = tf
 
 # Load pickled data
@@ -46,16 +46,12 @@ np.random.seed(seed)
 def create_model():
     # create model
     model = Sequential()
-    model.add(Conv2D(32, (5, 5), input_shape=(32, 32, 3))) # by default it initializes the weights to Xavier
+    model.add(Conv2D(32, (3, 3), input_shape=(32, 32, 3)))
     model.add(MaxPooling2D((2, 2)))
-    model.add(Dropout(0.2))
-    model.add(Activation('relu'))
-    model.add(Conv2D(100, (1, 1)))  # by default it initializes the weights to Xavier
+    model.add(Dropout(0.5))
     model.add(Activation('relu'))
     model.add(Flatten())
-    model.add(Dense(1024, kernel_initializer=initializers.random_normal(stddev=0.01)))  # 128
-    model.add(Activation('relu'))
-    model.add(Dense(256, kernel_initializer=initializers.random_normal(stddev=0.01))) #128
+    model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(Dense(43))
     model.add(Activation('softmax'))
@@ -64,22 +60,34 @@ def create_model():
     model.compile('adam', 'categorical_crossentropy', ['accuracy'])
     return model
 
-model = create_model()
+# history = model.fit(X_train_norm, y_one_hot_train, batch_size=256, nb_epoch=10,
+#                     validation_data=(X_valid_norm, y_one_hot_valid))
+
+# create model
+model = KerasClassifier(build_fn=create_model, verbose=0)
+# define the grid search parameters
+batch_size = [10, 20, 40, 60, 80, 100]
+epochs = [10, 50, 100]
+param_grid = dict(batch_size=batch_size, epochs=epochs)
+grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1)
+grid_result = grid.fit(X_train_norm, y_one_hot_train)
+
+# summarize results
+print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+means = grid_result.cv_results_['mean_test_score']
+stds = grid_result.cv_results_['std_test_score']
+params = grid_result.cv_results_['params']
+for mean, stdev, param in zip(means, stds, params):
+    print("%f (%f) with: %r" % (mean, stdev, param))
+
+# # evaluate the model
+# scores = model.evaluate(X, Y, verbose=0)
+# print("%s: %.2f%%" % (model.metrics_names[1], history[1] * 100))
 
 # serialize model to JSON
 model_json = model.to_json()
 with open("keras-traffic-sign-model.json", "w") as json_file:
     json_file.write(model_json)
-
-# checkpoint
-filepath = "weights.best.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-callbacks_list = [checkpoint]
-
-# Fit the model
-history = model.fit(X_train_norm, y_one_hot_train, batch_size=128, epochs=50,
-                    validation_data=(X_valid_norm, y_one_hot_valid), callbacks=callbacks_list, verbose=0)
-
 # serialize weights to HDF5
 model.save_weights("keras-traffic-sign-weights.h5")
 print("Saved model to disk")
@@ -99,3 +107,9 @@ print("Loaded model from disk")
 loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 score = loaded_model.evaluate(X_test_norm, y_one_hot_test, verbose=0)
 print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1] * 100))
+
+# metrics = model.evaluate(X_test_norm, y_one_hot_test)
+# for metric_i in range(len(model.metrics_names)):
+#     metric_name = model.metrics_names[metric_i]
+#     metric_value = metrics[metric_i]
+#     print('{}: {}'.format(metric_name, metric_value))
