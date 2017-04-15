@@ -1,0 +1,72 @@
+<html>
+<head>
+<title>internet-traffic-sign-prediction.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #606366; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); font-weight: bold; }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(128,128,128); }
+.s3 { color: rgb(204,120,50); }
+.s4 { color: rgb(104,151,187); }
+.s5 { color: rgb(0,128,128); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+internet-traffic-sign-prediction.py</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">from </span><span class="s1">matplotlib.image </span><span class="s0">import </span><span class="s1">imread 
+</span><span class="s0">import </span><span class="s1">matplotlib.pyplot </span><span class="s0">as </span><span class="s1">plt 
+</span><span class="s0">import </span><span class="s1">cv2 
+</span><span class="s0">from </span><span class="s1">keras.models </span><span class="s0">import </span><span class="s1">model_from_json 
+</span><span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np 
+</span><span class="s0">from </span><span class="s1">sklearn.preprocessing </span><span class="s0">import </span><span class="s1">LabelBinarizer 
+</span><span class="s0">from </span><span class="s1">scipy </span><span class="s0">import </span><span class="s1">misc 
+ 
+</span><span class="s2"># read the downloaded signs and resize to 32x32x3</span><span class="s1"> 
+signs = [] 
+rsigns = [] 
+fig</span><span class="s3">, </span><span class="s1">ax = plt.subplots(</span><span class="s4">2</span><span class="s3">, </span><span class="s4">5</span><span class="s1">) 
+fig.set_size_inches(</span><span class="s4">2</span><span class="s3">, </span><span class="s4">5</span><span class="s1">) 
+ 
+</span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(</span><span class="s4">5</span><span class="s1">): 
+    signs.append(imread(</span><span class="s5">&quot;sign&quot;</span><span class="s1">+str(i+</span><span class="s4">1</span><span class="s1">)+</span><span class="s5">&quot;.jpg&quot;</span><span class="s1">)) 
+    rsigns.append(cv2.resize(signs[i]</span><span class="s3">, </span><span class="s1">(</span><span class="s4">32</span><span class="s3">, </span><span class="s4">32</span><span class="s1">))) 
+    ax[</span><span class="s4">0</span><span class="s1">][i].imshow(signs[i]) 
+    ax[</span><span class="s4">1</span><span class="s1">][i].imshow(rsigns[i]) 
+ 
+plt.show() 
+ 
+X_test = np.ndarray(shape=(</span><span class="s4">5</span><span class="s3">, </span><span class="s4">32</span><span class="s3">, </span><span class="s4">32</span><span class="s3">, </span><span class="s4">3</span><span class="s1">)) 
+ 
+</span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(</span><span class="s4">5</span><span class="s1">): 
+    X_test[i</span><span class="s3">, </span><span class="s1">] = rsigns[i] 
+ 
+y_test = [</span><span class="s4">3</span><span class="s3">, </span><span class="s4">2</span><span class="s3">, </span><span class="s4">9</span><span class="s3">, </span><span class="s4">14</span><span class="s3">, </span><span class="s4">12</span><span class="s1">] 
+label_binarizer = LabelBinarizer() 
+y_one_hot_test = label_binarizer.fit_transform(y_test) 
+ 
+X_test_norm = np.array(X_test / </span><span class="s4">255.0 </span><span class="s1">- </span><span class="s4">0.5</span><span class="s1">) 
+ 
+</span><span class="s2"># load json and create model</span><span class="s1"> 
+json_file = open(</span><span class="s5">'keras-traffic-sign-model.json'</span><span class="s3">, </span><span class="s5">'r'</span><span class="s1">) 
+loaded_model_json = json_file.read() 
+json_file.close() 
+loaded_model = model_from_json(loaded_model_json) 
+ 
+</span><span class="s2"># load weights into new model</span><span class="s1"> 
+loaded_model.load_weights(</span><span class="s5">&quot;keras-traffic-sign-weights.h5&quot;</span><span class="s1">) 
+print(</span><span class="s5">&quot;Loaded model from disk&quot;</span><span class="s1">) 
+ 
+</span><span class="s2"># evaluate loaded model on test data</span><span class="s1"> 
+print(</span><span class="s5">&quot;Testing on 5 images&quot;</span><span class="s1">) 
+score = loaded_model.predict(X_test_norm</span><span class="s3">, </span><span class="s1">verbose=</span><span class="s4">1</span><span class="s1">) 
+print(score) 
+print(np.argmax(score</span><span class="s3">, </span><span class="s1">axis=</span><span class="s4">1</span><span class="s1">)) 
+</span></pre>
+</body>
+</html>

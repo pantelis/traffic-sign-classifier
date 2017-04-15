@@ -1,0 +1,124 @@
+<html>
+<head>
+<title>keras-traffic-sign.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #606366; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); font-weight: bold; }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(204,120,50); }
+.s3 { color: rgb(128,128,128); }
+.s4 { color: rgb(0,128,128); }
+.s5 { color: rgb(104,151,187); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+keras-traffic-sign.py</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">import </span><span class="s1">pickle 
+</span><span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np 
+</span><span class="s0">import </span><span class="s1">tensorflow </span><span class="s0">as </span><span class="s1">tf 
+</span><span class="s0">from </span><span class="s1">sklearn.preprocessing </span><span class="s0">import </span><span class="s1">LabelBinarizer 
+</span><span class="s0">from </span><span class="s1">keras.models </span><span class="s0">import </span><span class="s1">Sequential 
+</span><span class="s0">from </span><span class="s1">keras.layers.core </span><span class="s0">import </span><span class="s1">Dense</span><span class="s2">, </span><span class="s1">Activation</span><span class="s2">, </span><span class="s1">Flatten</span><span class="s2">, </span><span class="s1">Dropout 
+</span><span class="s0">from </span><span class="s1">keras.layers.convolutional </span><span class="s0">import </span><span class="s1">Conv2D 
+</span><span class="s0">from </span><span class="s1">keras.layers.pooling </span><span class="s0">import </span><span class="s1">MaxPooling2D 
+</span><span class="s0">from </span><span class="s1">keras.models </span><span class="s0">import </span><span class="s1">model_from_json 
+</span><span class="s0">from </span><span class="s1">keras.callbacks </span><span class="s0">import </span><span class="s1">ModelCheckpoint 
+</span><span class="s0">from </span><span class="s1">keras </span><span class="s0">import </span><span class="s1">initializers 
+</span><span class="s0">import </span><span class="s1">helper 
+ 
+tf.python.control_flow_ops = tf 
+ 
+</span><span class="s3"># Load pickled data</span><span class="s1"> 
+training_file = </span><span class="s4">'train.p'</span><span class="s1"> 
+validation_file = </span><span class="s4">'valid.p'</span><span class="s1"> 
+testing_file = </span><span class="s4">'test.p'</span><span class="s1"> 
+ 
+</span><span class="s0">with </span><span class="s1">open(training_file</span><span class="s2">, </span><span class="s1">mode=</span><span class="s4">'rb'</span><span class="s1">) </span><span class="s0">as </span><span class="s1">f: 
+    train = pickle.load(f) 
+</span><span class="s0">with </span><span class="s1">open(validation_file</span><span class="s2">, </span><span class="s1">mode=</span><span class="s4">'rb'</span><span class="s1">) </span><span class="s0">as </span><span class="s1">f: 
+    valid = pickle.load(f) 
+</span><span class="s0">with </span><span class="s1">open(testing_file</span><span class="s2">, </span><span class="s1">mode=</span><span class="s4">'rb'</span><span class="s1">) </span><span class="s0">as </span><span class="s1">f: 
+    test = pickle.load(f) 
+ 
+X_train</span><span class="s2">, </span><span class="s1">y_train = train[</span><span class="s4">'features'</span><span class="s1">]</span><span class="s2">, </span><span class="s1">train[</span><span class="s4">'labels'</span><span class="s1">] 
+X_valid</span><span class="s2">, </span><span class="s1">y_valid = valid[</span><span class="s4">'features'</span><span class="s1">]</span><span class="s2">, </span><span class="s1">valid[</span><span class="s4">'labels'</span><span class="s1">] 
+X_test</span><span class="s2">, </span><span class="s1">y_test = test[</span><span class="s4">'features'</span><span class="s1">]</span><span class="s2">, </span><span class="s1">test[</span><span class="s4">'labels'</span><span class="s1">] 
+ 
+</span><span class="s3"># pre-process data</span><span class="s1"> 
+X_train_norm</span><span class="s2">,  </span><span class="s1">X_valid_norm</span><span class="s2">, </span><span class="s1">X_test_norm = helper.normalize(X_train</span><span class="s2">, </span><span class="s1">X_valid</span><span class="s2">, </span><span class="s1">X_test) 
+ 
+label_binarizer = LabelBinarizer() 
+y_one_hot_train = label_binarizer.fit_transform(y_train) 
+y_one_hot_valid = label_binarizer.fit_transform(y_valid) 
+y_one_hot_test = label_binarizer.fit_transform(y_test) 
+ 
+</span><span class="s3"># fix the seed for reducing as much as possible variability in the results</span><span class="s1"> 
+seed = </span><span class="s5">10</span><span class="s1"> 
+np.random.seed(seed) 
+ 
+</span><span class="s3"># Build Deep Network Model in Keras</span><span class="s1"> 
+</span><span class="s0">def </span><span class="s1">create_model(): 
+    </span><span class="s3"># create model</span><span class="s1"> 
+    model = Sequential() 
+    model.add(Conv2D(</span><span class="s5">32</span><span class="s2">, </span><span class="s1">(</span><span class="s5">5</span><span class="s2">, </span><span class="s5">5</span><span class="s1">)</span><span class="s2">, </span><span class="s1">input_shape=(</span><span class="s5">32</span><span class="s2">, </span><span class="s5">32</span><span class="s2">, </span><span class="s5">3</span><span class="s1">))) </span><span class="s3"># by default it initializes the weights to Xavier</span><span class="s1"> 
+    model.add(MaxPooling2D((</span><span class="s5">2</span><span class="s2">, </span><span class="s5">2</span><span class="s1">))) 
+    model.add(Dropout(</span><span class="s5">0.2</span><span class="s1">)) 
+    model.add(Activation(</span><span class="s4">'relu'</span><span class="s1">)) 
+    model.add(Conv2D(</span><span class="s5">100</span><span class="s2">, </span><span class="s1">(</span><span class="s5">1</span><span class="s2">, </span><span class="s5">1</span><span class="s1">)))  </span><span class="s3"># by default it initializes the weights to Xavier</span><span class="s1"> 
+    model.add(Activation(</span><span class="s4">'relu'</span><span class="s1">)) 
+    model.add(Flatten()) 
+    model.add(Dense(</span><span class="s5">1024</span><span class="s2">, </span><span class="s1">kernel_initializer=initializers.random_normal(stddev=</span><span class="s5">0.01</span><span class="s1">)))  </span><span class="s3"># 128</span><span class="s1"> 
+    model.add(Activation(</span><span class="s4">'relu'</span><span class="s1">)) 
+    model.add(Dense(</span><span class="s5">256</span><span class="s2">, </span><span class="s1">kernel_initializer=initializers.random_normal(stddev=</span><span class="s5">0.01</span><span class="s1">))) </span><span class="s3">#128</span><span class="s1"> 
+    model.add(Activation(</span><span class="s4">'relu'</span><span class="s1">)) 
+    model.add(Dense(</span><span class="s5">43</span><span class="s1">)) 
+    model.add(Activation(</span><span class="s4">'softmax'</span><span class="s1">)) 
+ 
+    </span><span class="s3"># Compile model</span><span class="s1"> 
+    model.compile(</span><span class="s4">'adam'</span><span class="s2">, </span><span class="s4">'categorical_crossentropy'</span><span class="s2">, </span><span class="s1">[</span><span class="s4">'accuracy'</span><span class="s1">]) 
+    </span><span class="s0">return </span><span class="s1">model 
+ 
+model = create_model() 
+ 
+</span><span class="s3"># serialize model to JSON</span><span class="s1"> 
+model_json = model.to_json() 
+</span><span class="s0">with </span><span class="s1">open(</span><span class="s4">&quot;keras-traffic-sign-model.json&quot;</span><span class="s2">, </span><span class="s4">&quot;w&quot;</span><span class="s1">) </span><span class="s0">as </span><span class="s1">json_file: 
+    json_file.write(model_json) 
+ 
+</span><span class="s3"># checkpoint</span><span class="s1"> 
+filepath = </span><span class="s4">&quot;weights.best.hdf5&quot;</span><span class="s1"> 
+checkpoint = ModelCheckpoint(filepath</span><span class="s2">, </span><span class="s1">monitor=</span><span class="s4">'val_acc'</span><span class="s2">, </span><span class="s1">verbose=</span><span class="s5">1</span><span class="s2">, </span><span class="s1">save_best_only=</span><span class="s0">True</span><span class="s2">, </span><span class="s1">mode=</span><span class="s4">'max'</span><span class="s1">) 
+callbacks_list = [checkpoint] 
+ 
+</span><span class="s3"># Fit the model</span><span class="s1"> 
+history = model.fit(X_train_norm</span><span class="s2">, </span><span class="s1">y_one_hot_train</span><span class="s2">, </span><span class="s1">batch_size=</span><span class="s5">128</span><span class="s2">, </span><span class="s1">epochs=</span><span class="s5">50</span><span class="s2">,</span><span class="s1"> 
+                    validation_data=(X_valid_norm</span><span class="s2">, </span><span class="s1">y_one_hot_valid)</span><span class="s2">, </span><span class="s1">callbacks=callbacks_list</span><span class="s2">, </span><span class="s1">verbose=</span><span class="s5">0</span><span class="s1">) 
+ 
+</span><span class="s3"># serialize weights to HDF5</span><span class="s1"> 
+model.save_weights(</span><span class="s4">&quot;keras-traffic-sign-weights.h5&quot;</span><span class="s1">) 
+print(</span><span class="s4">&quot;Saved model to disk&quot;</span><span class="s1">) 
+ 
+print(</span><span class="s4">&quot;Testing&quot;</span><span class="s1">) 
+</span><span class="s3"># load json and create model</span><span class="s1"> 
+json_file = open(</span><span class="s4">'keras-traffic-sign-model.json'</span><span class="s2">, </span><span class="s4">'r'</span><span class="s1">) 
+loaded_model_json = json_file.read() 
+json_file.close() 
+loaded_model = model_from_json(loaded_model_json) 
+ 
+</span><span class="s3"># load weights into new model</span><span class="s1"> 
+loaded_model.load_weights(</span><span class="s4">&quot;keras-traffic-sign-weights.h5&quot;</span><span class="s1">) 
+print(</span><span class="s4">&quot;Loaded model from disk&quot;</span><span class="s1">) 
+ 
+</span><span class="s3"># evaluate loaded model on test data</span><span class="s1"> 
+loaded_model.compile(loss=</span><span class="s4">'categorical_crossentropy'</span><span class="s2">, </span><span class="s1">optimizer=</span><span class="s4">'adam'</span><span class="s2">, </span><span class="s1">metrics=[</span><span class="s4">'accuracy'</span><span class="s1">]) 
+score = loaded_model.evaluate(X_test_norm</span><span class="s2">, </span><span class="s1">y_one_hot_test</span><span class="s2">, </span><span class="s1">verbose=</span><span class="s5">0</span><span class="s1">) 
+print(</span><span class="s4">&quot;%s: %.2f%%&quot; </span><span class="s1">% (loaded_model.metrics_names[</span><span class="s5">1</span><span class="s1">]</span><span class="s2">, </span><span class="s1">score[</span><span class="s5">1</span><span class="s1">] * </span><span class="s5">100</span><span class="s1">)) 
+</span></pre>
+</body>
+</html>
